@@ -1,8 +1,9 @@
-import { Schema } from "mongoose";
-
+import mongoose ,{ Schema } from "mongoose";
+import jwt from 'jsonwebtoken'
+import bcrypt from 'bcrypt'
 
 const userSchema = new Schema({
-    Name:{
+    name:{
         type:String,
         required:true
     },
@@ -14,9 +15,8 @@ const userSchema = new Schema({
         type:String,
         required:true
     },
-    isAdmin:{
-        type:Boolean,
-        required:true,
-        default:false
-    },
-},{timestamps:true})
+    
+},{timestamps:true}) 
+
+
+export const User = mongoose.model("User",userSchema)
