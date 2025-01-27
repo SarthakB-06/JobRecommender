@@ -25,11 +25,13 @@ const LoginAndRegister = () => {
   const handleLogin = async () => {
     try {
       const response = await axios.post('/api/v1/users/login', { email , password })
+      
       console.log('Login successful:', response.data)
       localStorage.setItem('token', response.data.token)
       navigate('/dashboard')
     } catch (error) {
       console.error('Login failed:', error)
+      alert('Login Failed. Incorrect email or password.')
     }
   }
 
