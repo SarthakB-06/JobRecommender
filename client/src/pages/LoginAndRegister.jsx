@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { Player } from '@lottiefiles/react-lottie-player'
+import {useNavigate} from 'react-router-dom'
 import animationData from '../assets/login.json'
 import axios from 'axios'
 
@@ -8,15 +9,27 @@ const LoginAndRegister = () => {
   const [password, setPassword] = useState('')
   const [email, setEmail] = useState('')
   const [isLogin, setIsLogin] = useState(true)
+  const navigate = useNavigate()
 
   const handleRegister = async () => {
     try {
       const response = await axios.post('/api/v1/users/register', { name , email, password })
       console.log('Registration successful:', response.data)
+      navigate('/dashboard')
     
     } catch (error) {
       console.error('Registration failed:', error)
      
+    }
+  }
+  const handleLogin = async () => {
+    try {
+      const response = await axios.post('/api/v1/users/login', { email , password })
+      console.log('Login successful:', response.data)
+      localStorage.setItem('token', response.data.token)
+      navigate('/dashboard')
+    } catch (error) {
+      console.error('Login failed:', error)
     }
   }
 
