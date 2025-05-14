@@ -15,6 +15,14 @@ const userSchema = new Schema({
         type:String,
         required:true
     },
+    resumeUrl:{
+        type:String,
+        default:""
+    },
+    resumeUploaded:{
+        type:Boolean,
+        default:false
+    }
     
 },{timestamps:true}) 
 

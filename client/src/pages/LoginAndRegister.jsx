@@ -15,7 +15,7 @@ const LoginAndRegister = () => {
     try {
       const response = await axios.post('/api/v1/users/register', { name , email, password })
       console.log('Registration successful:', response.data)
-      navigate('/dashboard')
+      navigate('/dashboard/register')
     
     } catch (error) {
       console.error('Registration failed:', error)
@@ -28,6 +28,14 @@ const LoginAndRegister = () => {
       
       console.log('Login successful:', response.data)
       localStorage.setItem('token', response.data.token)
+      const userData = {
+        id: response.data.user?.id || response.data.user?._id,
+        name: response.data.user?.name || response.data.user?.name,
+        email: response.data.user?.email || response.data.user?.email,
+        resumeUploaded: response.data.user?.resumeUploaded || false,
+        
+      }
+      localStorage.setItem('userData', JSON.stringify(userData))
       navigate('/dashboard')
     } catch (error) {
       console.error('Login failed:', error)
@@ -62,7 +70,10 @@ const LoginAndRegister = () => {
         <h2 className='text-2xl font-bold mb-3'>{isLogin ? 'Welcome Back!' : 'Create an Account'}</h2>
         <p className='mb-4'>{isLogin ? 'Please login to your account to continue.' : 'Please register to create a new account.'}</p>
         <form  onSubmit={handleSubmit} action="" className='flex flex-col space-y-2'>
-          <input type="text" value={name} onChange={ev => setName(ev.target.value)} placeholder='Enter your name ' className='rounded-md text-lg' />
+        {!isLogin && (
+            <input type="text" value={name} onChange={ev => setName(ev.target.value)} placeholder='Enter your name' className='rounded-md text-lg' />
+          )}
+          {/* <input type="text" value={name} onChange={ev => setName(ev.target.value)} placeholder='Enter your name ' className='rounded-md text-lg' /> */}
           <input type="email" placeholder='Enter your Email' value={email} onChange={ev => setEmail(ev.target.value)} className='rounded-md text-lg'  />
           <input type="password" value={password} onChange={ev => setPassword(ev.target.value)} placeholder='Enter your password' className='rounded-md text-lg' />
           <button type='submit' className='bg-primary p-2 rounded-md text-white text-lg'>{isLogin ? 'Login' : 'Register'}</button>

@@ -53,5 +53,35 @@ export const userLogin = AsyncHandler(async (req, res) => {
   const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
     expiresIn: '1h',
   });
-  return res.status(200).json({ message: 'Login successful', token });
+  return res.status(200).json({ message: 'Login successful', token ,
+    user:{
+      id:user._id,
+      name:user.name,
+      email:user.email,
+      resumeUploaded:user.resumeUploaded
+    },
+  });
 })
+
+export const getUserProfile = AsyncHandler(async (req, res) => {
+  const user = await User.findById(req.user.id).select('-password');
+  if (!user) {
+    return res.status(404).json({ message: 'User not found' });
+  }
+  res.status(200).json(user);
+});
+
+export const markResumeUploaded = AsyncHandler(async (req, res) => {
+  const userId = req.user.id; 
+
+  const user = await User.findById(userId);
+  if (!user) {
+    return res.status(404).json({ message: 'User not found' });
+  }
+
+  user.resumeUploaded = true;
+  await user.save();
+
+  res.status(200).json({ message: 'Resume status updated', resumeUploaded: true });
+});
+

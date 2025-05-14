@@ -13,8 +13,9 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }));
 
 import userRouter from './routes/user.route.js';
-
+import resumeRouter from './routes/resume.route.js'
 app.use('/api/v1/users', userRouter);
+app.use('/api/v1/users/resume' , resumeRouter)
 
 
 

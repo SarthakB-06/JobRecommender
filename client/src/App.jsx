@@ -2,7 +2,9 @@ import { useState } from 'react'
 import Navbar from './Navbar'
 import LoginAndRegister from './pages/LoginAndRegister'
 import axios from 'axios';
-import Dashboard from './pages/dashboard';
+import DashboardbeforeLogin from './pages/DashboardbeforeLogin';
+import DashboardafterLogin from './pages/DashboardafterLogin';
+import LandingPage from './pages/LandingPage';
 import { BrowserRouter  as Router , Route , Routes } from 'react-router-dom';
 
 
@@ -12,8 +14,10 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<LoginAndRegister />} />
-        <Route path="/dashboard" element={< Dashboard/>} />
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/login" element={<LoginAndRegister />} />
+        <Route path="/dashboard/register" element={< DashboardbeforeLogin/>} />
+        <Route path="/dashboard" element={< DashboardafterLogin/>} />
       </Routes>
     </Router>
   )
