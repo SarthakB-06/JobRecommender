@@ -18,3 +18,39 @@ export const uploadResumeToCloudinary = [
     res.status(200).json({ message: 'Resume uploaded to Cloudinary', url: req.file.path });
   }),
 ];
+
+
+export const saveParsedResumeData = AsyncHandler(async (req,res) => {
+  try {
+    const userId = req.user.id;
+    const { parsedData } = req.body;
+
+    if (!parsedData) {
+      return res.status(400).json({success: false ,  message: 'Parsed data is required' });
+    }
+
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId ,
+      {
+        parsedResumeData: parsedData,
+        resumeParsedAt: new Date(),
+      },
+      { new: true }
+      
+    );
+
+    if(!updatedUser){
+      return res.status(404).json({success: false , message: 'User not found' });
+    }
+
+
+    return res.status(200).json({
+      success:true,
+      message: 'Resume data saved successfully'
+    })
+  } catch (error) {
+    console.error('Error saving parsed resume data:', error);
+    return res.status(500).json({success: false , message: 'Internal server error'  , error:error.message});
+  }
+})

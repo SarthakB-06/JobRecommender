@@ -22,6 +22,14 @@ const userSchema = new Schema({
     resumeUploaded:{
         type:Boolean,
         default:false
+    },
+    parsedResumeData:{
+        type:Object,
+        default:null
+    },
+    resumeParsedAt:{
+        type:Date,
+        default:null
     }
     
 },{timestamps:true}) 

@@ -58,7 +58,10 @@ export const userLogin = AsyncHandler(async (req, res) => {
       id:user._id,
       name:user.name,
       email:user.email,
-      resumeUploaded:user.resumeUploaded
+      resumeUploaded:user.resumeUploaded || false,
+      resumeUrl:user.resumeUrl || '',
+      parsedResumeData: user.parsedResumeData || null
+
     },
   });
 })
@@ -66,9 +69,19 @@ export const userLogin = AsyncHandler(async (req, res) => {
 export const getUserProfile = AsyncHandler(async (req, res) => {
   const user = await User.findById(req.user.id).select('-password');
   if (!user) {
-    return res.status(404).json({ message: 'User not found' });
+    return res.status(404).json({ success: false, message: 'User not found' });
   }
-  res.status(200).json(user);
+  
+  // Return consistent format with success key and proper structure
+  res.status(200).json({
+    success: true,
+    parsedResumeData: user.parsedResumeData || null,
+    resumeUrl: user.resumeUrl || '',
+    resumeUploaded: user.resumeUploaded || false,
+    name: user.name,
+    email: user.email,
+    _id: user._id
+  });
 });
 
 export const markResumeUploaded = AsyncHandler(async (req, res) => {
@@ -82,6 +95,17 @@ export const markResumeUploaded = AsyncHandler(async (req, res) => {
   user.resumeUploaded = true;
   await user.save();
 
-  res.status(200).json({ message: 'Resume status updated', resumeUploaded: true });
+  res.status(200).json({ 
+    success:true,
+    user:{
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      resumeUploaded: user.resumeUploaded || false,
+      resumeUrl: user.resumeUrl || null,
+      parsedResumeData: user.parsedResumeData || null
+    }
+
+   });
 });
 
