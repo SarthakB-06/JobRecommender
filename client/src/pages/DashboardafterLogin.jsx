@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Sidebar from '../components/Sidebar';
-
+import JobRecommendations from './JobRecommendations';
 const DashboardafterLogin = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -116,17 +116,29 @@ const DashboardafterLogin = () => {
 
   return (
 
-    
-    <div className=" flex w-full gap-5">
-      <Sidebar/>
+
+    <div className="flex">
+      <Sidebar />
       {/* <h1 className="text-3xl font-bold mb-6" style={{ color: '#560edd' }}>Your Dashboard</h1> */}
 
+      <div id='main-content' className='w-full p-4 transition-all duration-300'>
+
+      
       {parsedData ? (
-        <div style={{ color: '#560edd' }} className='space-y-6 mt-5'>
+        <div style={{ color: '#560edd' }} className='space-y-6 mt-5 '>
+
+          <div className='flex justify-between '>
+
+          
           <div className='flex flex-col justify-center items-start'>
             <h1 style={{ color: '#560edd' }} className='text-3xl font-semibold '>Welcome back, {parsedData?.name || 'User'}👋</h1>
             <p className='mt-1 text-gray-600'>Let's help you find your dream job today</p>
           </div>
+          <div>
+            <button onClick={()=> navigate('/login')}  style={{backgroundColor:"#560edd"}} className='px-5 py-2 font-semibold cursor-pointer text-white rounded-md'>Logout</button>
+          </div>
+          </div>
+          
 
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -166,7 +178,13 @@ const DashboardafterLogin = () => {
 
 
 
+          <div className="mt-6 grid grid-cols3 ">
+            <h2 className="text-xl font-semibold mb-4" style={{ color: '#560edd' }}>Job Recommendations Based on Your Skills</h2>
+            <div className=' '>
 
+            <JobRecommendations skills={parsedData?.skills || []} />
+            </div>
+          </div>
 
 
 
@@ -265,6 +283,7 @@ const DashboardafterLogin = () => {
       )}
 
       {/* Rest of your dashboard content */}
+      </div>
     </div>
   );
 };

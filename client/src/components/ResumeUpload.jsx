@@ -82,6 +82,10 @@ const ResumeUpload = () => {
         { url: cloudinaryUrl }
       );
 
+      const handleUploadSuccess = (cloudinaryUrl) => {
+        navigate("/dashboard/resume", { state: { resumeUrl: cloudinaryUrl } });
+      };
+
       // Step 5: Handle parsed data
       const parsedResumeData = parserResponse.data.parsedData;
       setParsedData(parsedResumeData);
