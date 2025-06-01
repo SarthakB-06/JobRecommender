@@ -66,6 +66,11 @@ export const userLogin = AsyncHandler(async (req, res) => {
   });
 })
 
+export const userLogout = AsyncHandler(async (req,res)=>{
+  res.clearCookie('token');
+  return res.status(200).json({message:'Logout successful'})
+})
+
 export const getUserProfile = AsyncHandler(async (req, res) => {
   const user = await User.findById(req.user.id).select('-password');
   if (!user) {
@@ -108,4 +113,6 @@ export const markResumeUploaded = AsyncHandler(async (req, res) => {
 
    });
 });
+
+
 

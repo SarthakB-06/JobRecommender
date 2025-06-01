@@ -54,3 +54,35 @@ export const saveParsedResumeData = AsyncHandler(async (req,res) => {
     return res.status(500).json({success: false , message: 'Internal server error'  , error:error.message});
   }
 })
+
+
+export const viewResume = AsyncHandler(async (req, res) => {
+  console.log("Received request to view resume with URL:", req.body.url);
+  try {
+    const { url } = req.body;
+    console.log('body' , req.body)
+    
+    if (!url) {
+      return res.status(400).json({
+        success: false,
+        message: 'Resume URL is required'
+      });
+    }
+    
+    // Forward request to the Python FastAPI
+    const pythonApiUrl = process.env.PYTHON_API_URL || 'http://127.0.0.1:8000';
+    const response = await axios.post(`${pythonApiUrl}/view-resume`, { url });
+    
+    return res.status(200).json({
+      success: true,
+      text: response.data.text
+    });
+  } catch (error) {
+    console.error('Error viewing resume:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Error viewing resume',
+      error: error.response?.data?.detail || error.message
+    });
+  }
+});
