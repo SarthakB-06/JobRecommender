@@ -1,6 +1,7 @@
 import {User} from "../models/user.model.js"; // Fix this import - remove curly braces
 import AsyncHandler from "express-async-handler";
 import { searchJobs, calculateSkillMatch } from '../utils/JobService.js';
+import savedJobModel from "../models/savedJob.model.js";
 
 // Get job recommendations based on user skills
 export const getJobRecommendations = AsyncHandler(async (req, res) => {
@@ -92,6 +93,136 @@ export const getJobRecommendations = AsyncHandler(async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Error generating job recommendations",
+      error: error.message
+    });
+  }
+});
+
+export const saveJob = AsyncHandler(async (req, res) => {
+  try {
+    const userId = req.user._id;
+    console.log("Received job save request:", req.body);
+    
+    const { 
+      jobId, title, company, location, salary, 
+      link, description, skills, datePosted, jobType, matchScore 
+    } = req.body;
+    
+    // Validate required fields
+    if (!jobId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Missing required field: jobId'
+      });
+    }
+    
+    if (!title) {
+      return res.status(400).json({
+        success: false,
+        message: 'Missing required field: title'
+      });
+    }
+    
+    if (!company) {
+      return res.status(400).json({
+        success: false,
+        message: 'Missing required field: company'
+      });
+    }
+    
+    // Check if job is already saved
+    const existingJob = await savedJobModel.findOne({ user: userId, jobId });
+    
+    if (existingJob) {
+      return res.status(200).json({
+        success: true,
+        message: 'Job already saved',
+        savedJob: existingJob
+      });
+    }
+    
+    // Create new saved job
+    const savedJob = await savedJobModel.create({
+      user: userId,
+      jobId,
+      title,
+      company,
+      location: location || '',
+      salary: salary || '',
+      link: link || '',
+      description: description || '',
+      skills: Array.isArray(skills) ? skills : [],
+      datePosted: datePosted || '',
+      jobType: jobType || '',
+      matchScore: matchScore || 0
+    });
+    
+    return res.status(201).json({
+      success: true,
+      message: 'Job saved successfully',
+      savedJob
+    });
+  } catch (error) {
+    console.error('Error saving job:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Error saving job',
+      error: error.message
+    });
+  }
+});
+
+export const unsaveJob = AsyncHandler(async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { jobId } = req.params;
+    
+    if (!jobId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Job ID is required'
+      });
+    }
+    
+    const result = await savedJobModel.findOneAndDelete({ user: userId, jobId });
+    
+    if (!result) {
+      return res.status(404).json({
+        success: false,
+        message: 'Saved job not found'
+      });
+    }
+    
+    return res.status(200).json({
+      success: true,
+      message: 'Job removed from saved jobs'
+    });
+  } catch (error) {
+    console.error('Error removing saved job:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Error removing saved job',
+      error: error.message
+    });
+  }
+});
+
+export const getSavedJobs = AsyncHandler(async (req, res) => {
+  try {
+    const userId = req.user._id;
+    
+    const savedJobs = await savedJobModel.find({ user: userId }).sort({ savedAt: -1 });
+    
+    return res.status(200).json({
+      success: true,
+      count: savedJobs.length,
+      savedJobs
+    });
+  } catch (error) {
+    console.error('Error fetching saved jobs:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Error fetching saved jobs',
       error: error.message
     });
   }
