@@ -9,6 +9,7 @@ import LandingPage from './pages/LandingPage';
 import JobRecommendationsPage from './pages/JobRecommendationsPage';
 import { BrowserRouter  as Router , Route , Routes } from 'react-router-dom';
 import ViewResume from './pages/ViewResume';
+import SavedJobsPage from './pages/SavedJobsPage';
 
 
 function App() {
@@ -24,6 +25,7 @@ function App() {
         {/* <Route path="/dashboard/resume" element={<DashboardafterLogin />} /> */}
         <Route path="/dashboard/recommendations" element={<JobRecommendationsPage />} />
         <Route path='/dashboard/resume' element={<ViewResume />} />
+        <Route path='/dashboard/saved-jobs' element={<SavedJobsPage />} />
         
 
       </Routes>
