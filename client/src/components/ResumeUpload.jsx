@@ -78,7 +78,7 @@ const ResumeUpload = () => {
 
       // Step 4: Send URL to Python parser API
       const parserResponse = await axios.post(
-        'http://127.0.0.1:8000/parse-resume',
+        'https://job-recommender-python.onrender.com',
         { url: cloudinaryUrl }
       );
 

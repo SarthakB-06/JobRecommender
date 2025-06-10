@@ -17,7 +17,7 @@ import SettingsPage from './pages/SettingsPage';
 
 
 function App() {
-  axios.defaults.baseURL = 'http://localhost:8000';
+  axios.defaults.baseURL = 'https://job-recommender-nodejs.onrender.com';
   axios.defaults.withCredentials = true;
   return (
     <Router>
