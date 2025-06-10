@@ -29,6 +29,8 @@ app.add_middleware(
 class ResumeURL(BaseModel):
     url: str
 
+
+
 # Home endpoint to verify the API is running
 @app.get("/")
 def read_root():
@@ -327,6 +329,8 @@ def extract_skills(text):
     
     return found_skills
 
+
+
 # Resume parsing endpoint
 @app.post("/parse-resume")
 async def parse_resume(resume_url: ResumeURL):
@@ -410,6 +414,35 @@ async def parse_resume(resume_url: ResumeURL):
         import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Error parsing resume: {str(e)}")
+    
+
+@app.post("/view-resume")
+async def view_resume(data: ResumeURL):
+    try:
+        # Fetch the resume from the given URL
+        response = requests.get(data.url)
+        if response.status_code != 200:
+            raise HTTPException(status_code=400, detail="Could not fetch resume from URL")
+
+        file_bytes = response.content
+
+        # Determine file type and extract text
+        if is_pdf(file_bytes):
+            extracted_text = extract_text_from_pdf(file_bytes)
+        elif is_docx(file_bytes):
+            extracted_text = extract_text_from_docx(file_bytes)
+        else:
+            raise HTTPException(status_code=415, detail="Unsupported file format")
+
+        if not extracted_text.strip():
+            raise HTTPException(status_code=422, detail="Could not extract text from the resume")
+
+        # Return the raw extracted text
+        return {"text": extracted_text}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Resume viewer error: {str(e)}")
+
 
 if __name__ == "__main__":
     print("Run this script with: uvicorn main:app --reload --port 8000")
