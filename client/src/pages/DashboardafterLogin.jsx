@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Sidebar from '../components/Sidebar';
 import JobRecommendations from './JobRecommendations';
+import {toast} from 'react-hot-toast'
 const DashboardafterLogin = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -12,20 +13,20 @@ const DashboardafterLogin = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        // First check if we have a token
+        
         const token = localStorage.getItem('token');
         if (!token) {
           navigate('/login');
           return;
         }
 
-        // Start with data from localStorage to show something quickly
+        
         const userData = JSON.parse(localStorage.getItem('userData'));
         if (userData?.parsedData) {
           setParsedData(userData.parsedData);
         }
 
-        // Then fetch fresh data from the API
+        
         const response = await axios.get('/api/v1/users/me', {
           headers: {
             'Authorization': `Bearer ${token}`
@@ -36,12 +37,9 @@ const DashboardafterLogin = () => {
 
 
         if (response.data.success) {
-          // Log the exact data structure 
-          // console.log('parsedResumeData structure:', JSON.stringify(response.data.parsedResumeData, null, 2));
-
-          // Make sure it has the expected properties before setting state
+          
           if (response.data.parsedResumeData) {
-            // Create a properly formatted object before setting state
+            
             const formattedData = {
               name: response.data.parsedResumeData.name || 'Not available',
               email: response.data.parsedResumeData.email || 'Not available',
@@ -64,7 +62,7 @@ const DashboardafterLogin = () => {
             console.log('Formatted data for state:', formattedData);
             setParsedData(formattedData);
 
-            // Update localStorage with properly formatted data
+            
             const freshUserData = {
               ...userData,
               parsedData: formattedData,
@@ -80,7 +78,6 @@ const DashboardafterLogin = () => {
         console.error('Error fetching user data:', error);
         setError('Failed to load your profile data. Please try again later.');
 
-        // If API fails, we'll use whatever we have in localStorage
         const userData = JSON.parse(localStorage.getItem('userData'));
         if (userData?.parsedData) {
           setParsedData(userData.parsedData);
@@ -93,7 +90,7 @@ const DashboardafterLogin = () => {
     fetchUserData();
   }, [navigate]);
 
-  // Add this after your other useEffect
+  
   useEffect(() => {
     console.log('parsedData state changed:', parsedData);
     // Force a re-render if needed
@@ -109,6 +106,39 @@ const DashboardafterLogin = () => {
       </div>
     );
   }
+
+  const handleLogout = async () => {
+    try {
+      
+      const token = localStorage.getItem('token');
+      
+      if (!token) {
+        
+        localStorage.removeItem('token'); 
+        navigate('/login');
+        return;
+      }
+      
+      // Make the logout API call with proper headers
+      const response = await axios.post('/api/v1/users/logout', {}, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      console.log("Logout response:", response.data);
+      localStorage.removeItem('token');
+      navigate('/login');
+      toast.success('Logged out successfully');
+    } catch (error) {
+      console.error('Logout error:', error);
+
+      localStorage.removeItem('token');
+      navigate('/login');
+      
+      toast.error('Logged out with errors');
+    }
+  };
 
   const skillCount = parsedData?.skills?.length || 0;
   const experienceCount = parsedData?.experience?.length || 0;
@@ -135,7 +165,7 @@ const DashboardafterLogin = () => {
             <p className='mt-1 text-gray-600'>Let's help you find your dream job today</p>
           </div>
           <div>
-            <button onClick={()=> navigate('/login')}  style={{backgroundColor:"#560edd"}} className='px-5 py-2 font-semibold cursor-pointer text-white rounded-md'>Logout</button>
+            <button onClick={handleLogout}  style={{backgroundColor:"#560edd"}} className='px-5 py-2 font-semibold cursor-pointer text-white rounded-md'>Logout</button>
           </div>
           </div>
           

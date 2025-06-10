@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { Briefcase, MapPin, DollarSign, Calendar, Bookmark,BookmarkCheck, Percent, ExternalLink, Globe, Tag } from 'lucide-react';
+import { Briefcase, MapPin, DollarSign, Calendar, Bookmark,TrendingUp , BookmarkCheck, Percent, ExternalLink, Globe, Tag } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 const JobRecommendations = ({ skills }) => {
@@ -16,9 +16,9 @@ const JobRecommendations = ({ skills }) => {
   const navigate = useNavigate();
 
 
-  
 
- 
+
+
   const popularCities = [
     'Bangalore', 'Mumbai', 'Delhi', 'Hyderabad',
     'Chennai', 'Pune', 'Kolkata', 'Ahmedabad', 'Noida'
@@ -27,28 +27,28 @@ const JobRecommendations = ({ skills }) => {
   const handleSaveJob = async (job, isSaved) => {
     try {
       console.log("Full job object:", job);
-      
+
       const token = localStorage.getItem('token');
-      
+
       if (!token) {
         toast.error('Please log in to save jobs');
         navigate('/login');
         return;
       }
-      
-      
+
+
       setSavingJobs(prev => ({ ...prev, [job._id]: true }));
-      
+
       if (isSaved) {
-        
+
         const response = await axios.delete(`/api/v1/jobs/unsave/${job._id}`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
         });
-        
+
         if (response.data.success) {
-          
+
           setSavedJobs(prev => {
             const updated = { ...prev };
             delete updated[job._id];
@@ -57,33 +57,33 @@ const JobRecommendations = ({ skills }) => {
           toast.success('Job removed from saved jobs');
         }
       } else {
-        
+
         const jobData = {
-          jobId: job._id,               
-          title: job.title,             
-          company: job.company,         
+          jobId: job._id,
+          title: job.title,
+          company: job.company,
           location: job.location || '',
           salary: typeof job.salary === 'object' ? `${job.salary.min || ''}-${job.salary.max || ''}` : (job.salary || ''),
-          link: job.url || '',         
+          link: job.url || '',
           description: job.description || '',
           skills: job.matchingSkills || [],
           datePosted: job.datePosted || '',
-          jobType: job.type || '',      
-          matchScore: job.matchPercentage || 0  
+          jobType: job.type || '',
+          matchScore: job.matchPercentage || 0
         };
-        
+
         console.log("Sending job data to server:", jobData);
-        
+
         const response = await axios.post('/api/v1/jobs/save', jobData, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
         });
-        
+
         console.log("Save response:", response.data);
-        
+
         if (response.data.success) {
-         
+
           setSavedJobs(prev => ({ ...prev, [job._id]: true }));
           toast.success('Job saved successfully');
         }
@@ -92,7 +92,7 @@ const JobRecommendations = ({ skills }) => {
       console.error('Error saving/unsaving job:', error);
       toast.error('Error saving job');
     } finally {
- 
+
       setSavingJobs(prev => {
         const updated = { ...prev };
         delete updated[job._id];
@@ -144,19 +144,19 @@ const JobRecommendations = ({ skills }) => {
     const fetchSavedJobIds = async () => {
       try {
         const token = localStorage.getItem('token');
-        
+
         if (!token) {
           return;
         }
-        
+
         const response = await axios.get('/api/v1/jobs/saved', {
           headers: {
             'Authorization': `Bearer ${token}`
           }
         });
-        
+
         if (response.data.success) {
-          
+
           const savedJobMap = {};
           response.data.savedJobs.forEach(job => {
             savedJobMap[job.jobId] = true;
@@ -168,10 +168,10 @@ const JobRecommendations = ({ skills }) => {
       }
     };
 
-   
-    
 
-    
+
+
+
     if (skills && skills.length > 0) {
       fetchRecommendations();
     } else {
@@ -349,13 +349,20 @@ const JobRecommendations = ({ skills }) => {
                   )}
                 </div>
 
-                <div className="mt-3">
+                <div className="mt-3 flex items-center gap-3">
                   <button
                     onClick={() => job.url ? openExternalJob(job.url) : null}
                     className="flex items-center text-purple-600 hover:text-purple-800 text-sm font-medium"
                     disabled={!job.url}
                   >
                     Apply Now <ExternalLink size={14} className="ml-1" />
+                  </button>
+                  <button
+                    onClick={() => navigate(`/dashboard/skill-gap/${job._id}`)}
+                    className="inline-flex items-center text-sm text-purple-600 hover:text-purple-800 ml-4"
+                  >
+                    <TrendingUp size={14} className="mr-1" />
+                    Analyze Skills
                   </button>
                 </div>
               </div>

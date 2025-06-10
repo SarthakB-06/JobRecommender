@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { Briefcase, MapPin, DollarSign, Calendar, ExternalLink, BookmarkX, Tag, AlertCircle } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
-import { toast } from 'react-hot-toast'; // Import if you're using toast
+import { toast } from 'react-hot-toast'; 
 
 const SavedJobsPage = () => {
   const [savedJobs, setSavedJobs] = useState([]);
@@ -52,7 +52,7 @@ const SavedJobsPage = () => {
         return;
       }
       
-      // Set removing state for this job
+      
       setRemoving(prev => ({ ...prev, [jobId]: true }));
       
       const response = await axios.delete(`/api/v1/jobs/unsave/${jobId}`, {
