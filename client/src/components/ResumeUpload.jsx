@@ -60,7 +60,7 @@ const ResumeUpload = () => {
         console.log("Token format:", token.substring(0, 10) + "...");
       }
 
-      
+
       // Step 1: Create FormData with file
       const formData = new FormData();
       formData.append('resume', selectedFile);
@@ -86,7 +86,7 @@ const ResumeUpload = () => {
 
       // Step 4: Send URL to Python parser API
       const parserResponse = await axios.post(
-        'https://job-recommender-python.onrender.com',
+        'https://job-recommender-python.onrender.com/parse-resume',
         { url: cloudinaryUrl }
       );
 
