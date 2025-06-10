@@ -44,7 +44,7 @@ const Sidebar = () => {
     { label: 'Skill Gap Analysis', icon: <Search size={25} />, to: '/dashboard/skill-gap' },
     { label: 'Saved Jobs', icon: <Briefcase size={25} />, to: '/dashboard/saved-jobs' },
     { label: 'Settings', icon: <Settings size={25} />, to: '/dashboard/settings' },
-    { label: 'Logout', icon: <LogOut size={25} />, to: '/logout' },
+    
   ];
 
   useEffect(() => {
