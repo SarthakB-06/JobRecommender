@@ -15,6 +15,10 @@ const LoginAndRegister = () => {
     try {
       const response = await axios.post('/api/v1/users/register', { name , email, password })
       console.log('Registration successful:', response.data)
+      if (response.data.success && response.data.token) {
+        localStorage.setItem('token', response.data.token);
+        console.log("Token stored after registration:", !!response.data.token);
+      }
       navigate('/dashboard/register')
     
     } catch (error) {
