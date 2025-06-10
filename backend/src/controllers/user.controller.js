@@ -2,6 +2,8 @@ import bcrypt from 'bcrypt';
 import {User} from '../models/user.model.js'; 
 import AsyncHandler from 'express-async-handler';
 import jwt from 'jsonwebtoken';
+import savedJobModel from '../models/savedJob.model.js';
+// import { getSavedJobs } from './job.controller.js';
 
 
 
@@ -114,5 +116,169 @@ export const markResumeUploaded = AsyncHandler(async (req, res) => {
    });
 });
 
+export const updateUserProfile = AsyncHandler(async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { name, email } = req.body;
+    
+    // Validation
+    if (email) {
+      const existingUser = await User.findOne({ email, _id: { $ne: userId } });
+      if (existingUser) {
+        return res.status(400).json({
+          success: false,
+          message: 'Email is already in use by another account'
+        });
+      }
+    }
+    
+    const updateData = {};
+    if (name) updateData.name = name;
+    if (email) updateData.email = email;
+    
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      updateData,
+      { new: true }
+    );
+    
+    if (!updatedUser) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+    
+    return res.status(200).json({
+      success: true,
+      message: 'Profile updated successfully'
+    });
+  } catch (error) {
+    console.error('Error updating profile:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to update profile'
+    });
+  }
+});
 
+export const updateUserPassword = AsyncHandler(async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { currentPassword, newPassword } = req.body;
+    
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'Current password and new password are required'
+      });
+    }
+    
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+    
+    // Verify current password
+    const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+    if (!isPasswordValid) {
+      return res.status(400).json({
+        success: false,
+        message: 'Current password is incorrect'
+      });
+    }
+    
+    // Hash new password and update
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    await user.save();
+    
+    return res.status(200).json({
+      success: true,
+      message: 'Password updated successfully'
+    });
+  } catch (error) {
+    console.error('Error updating password:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to update password'
+    });
+  }
+});
 
+export const updateUserPreferences = AsyncHandler(async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { defaultLocation, salary, jobTypes, notifications, manualSkills } = req.body;
+    
+    // Create preferences object with provided data
+    const preferences = {};
+    if (defaultLocation !== undefined) preferences.defaultLocation = defaultLocation;
+    if (salary !== undefined) preferences.salary = salary;
+    if (jobTypes !== undefined) preferences.jobTypes = jobTypes;
+    if (notifications !== undefined) preferences.notifications = notifications;
+    
+    // Update user document
+    const updateData = { preferences };
+    if (manualSkills !== undefined) {
+      updateData.manualSkills = manualSkills;
+    }
+    
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { $set: updateData },
+      { new: true }
+    );
+    
+    if (!updatedUser) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+    
+    return res.status(200).json({
+      success: true,
+      message: 'Preferences updated successfully'
+    });
+  } catch (error) {
+    console.error('Error updating preferences:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to update preferences'
+    });
+  }
+});
+
+export const deleteUserAccount = AsyncHandler(async (req, res) => {
+  try {
+    const userId = req.user._id;
+    
+    // Delete user's saved jobs
+    await savedJobModel.deleteMany({ user: userId });
+    
+    // Delete the user account
+    const deletedUser = await User.findByIdAndDelete(userId);
+    
+    if (!deletedUser) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+    
+    return res.status(200).json({
+      success: true,
+      message: 'Account deleted successfully'
+    });
+  } catch (error) {
+    console.error('Error deleting account:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to delete account'
+    });
+  }
+});

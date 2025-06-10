@@ -30,7 +30,45 @@ const userSchema = new Schema({
     resumeParsedAt:{
         type:Date,
         default:null
-    }
+    },
+    preferences: {
+        defaultLocation: {
+          type: String,
+          default: ''
+        },
+        salary: {
+          min: {
+            type: Number,
+            default: null
+          },
+          max: {
+            type: Number,
+            default: null
+          }
+        },
+        jobTypes: {
+          type: [String],
+          default: []
+        },
+        notifications: {
+          email: {
+            type: Boolean,
+            default: true
+          },
+          jobAlerts: {
+            type: Boolean,
+            default: true
+          },
+          weeklyDigest: {
+            type: Boolean,
+            default: false
+          }
+        }
+      },
+      manualSkills: {
+        type: [String],
+        default: []
+      }
     
 },{timestamps:true}) 
 

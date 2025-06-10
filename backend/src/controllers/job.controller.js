@@ -227,3 +227,114 @@ export const getSavedJobs = AsyncHandler(async (req, res) => {
     });
   }
 });
+
+// In backend/src/controllers/job.controller.js
+
+export const analyzeSkillGaps = AsyncHandler(async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { jobId } = req.params; // Get the specific job ID to analyze
+    
+    // Get user with parsed resume data
+    const user = await User.findById(userId);
+    
+    if (!user || !user.parsedResumeData || !user.parsedResumeData.skills) {
+      return res.status(400).json({
+        success: false,
+        message: "No skills found in your resume. Please upload your resume first."
+      });
+    }
+    
+    // Get user's current skills (normalize to lowercase for better matching)
+    const userSkills = user.parsedResumeData.skills.map(skill => skill.toLowerCase());
+    
+    // Try to find the job in saved jobs first (most efficient)
+    let jobData = await savedJobModel.findOne({ user: userId, jobId });
+    
+    // If not in saved jobs, fetch it from the API
+    if (!jobData) {
+      // This would be a new API call to get a specific job by ID
+      // Since RapidAPI might not have a direct endpoint for this, we might need to
+      // implement client-side caching of recently viewed jobs
+      return res.status(404).json({
+        success: false,
+        message: "Job not found. Please save the job first or try again with a different job."
+      });
+    }
+    
+    // Extract required skills from job description
+    const requiredSkills = extractSkillsFromJobDescription(jobData.description);
+    
+    // Find skills the user has that match job requirements
+    const matchedSkills = requiredSkills.filter(skill => 
+      userSkills.includes(skill.toLowerCase())
+    );
+    
+    // Find skills the user is missing
+    const missingSkills = requiredSkills.filter(skill => 
+      !userSkills.includes(skill.toLowerCase())
+    );
+    
+    // Calculate match percentage
+    const matchPercentage = requiredSkills.length > 0 
+      ? Math.round((matchedSkills.length / requiredSkills.length) * 100) 
+      : 0;
+    
+    return res.status(200).json({
+      success: true,
+      data: {
+        job: {
+          id: jobData.jobId,
+          title: jobData.title,
+          company: jobData.company,
+          description: jobData.description
+        },
+        userSkills,
+        requiredSkills,
+        matchedSkills,
+        missingSkills,
+        matchPercentage
+      }
+    });
+  } catch (error) {
+    console.error('Error analyzing skill gaps:', error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to analyze skill gaps",
+      error: error.message
+    });
+  }
+});
+
+// Function to extract skills from job description
+function extractSkillsFromJobDescription(description) {
+  if (!description) return [];
+  
+  // List of common tech skills to look for
+  const commonSkills = [
+    'javascript', 'python', 'java', 'c#', 'c++', 'php', 'ruby', 'swift', 'typescript', 'golang',
+    'react', 'angular', 'vue', 'node.js', 'express', 'django', 'flask', 'spring', 'laravel', '.net',
+    'mongodb', 'mysql', 'postgresql', 'sqlite', 'oracle', 'sql', 'nosql', 'firebase', 'redis',
+    'aws', 'azure', 'google cloud', 'docker', 'kubernetes', 'jenkins', 'git', 'github', 'gitlab',
+    'html', 'css', 'sass', 'less', 'tailwind', 'bootstrap', 'material-ui', 'webpack', 'babel',
+    'rest api', 'graphql', 'microservices', 'ci/cd', 'agile', 'scrum', 'jira', 'confluence',
+    'machine learning', 'deep learning', 'ai', 'data science', 'data analysis', 'data visualization',
+    'tensorflow', 'pytorch', 'pandas', 'numpy', 'scikit-learn', 'r', 'tableau', 'power bi',
+    'mobile development', 'ios', 'android', 'react native', 'flutter', 'xamarin',
+    'devops', 'sre', 'security', 'blockchain', 'cloud computing'
+  ];
+  
+  const descriptionLower = description.toLowerCase();
+  const foundSkills = [];
+  
+  commonSkills.forEach(skill => {
+    if (descriptionLower.includes(skill.toLowerCase())) {
+      // Add it if not already in the list (case-insensitive check)
+      if (!foundSkills.some(s => s.toLowerCase() === skill.toLowerCase())) {
+        foundSkills.push(skill);
+      }
+    }
+  });
+  
+  return foundSkills;
+}
